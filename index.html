@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Healthy Food Selection</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .food-image {
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .food-image:hover {
+            border-color: #aaa;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .plate {
+            width: 400px;
+            height: 400px;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            position: relative;
+            background: url('https://www.publicdomainpictures.net/pictures/30000/nahled/white-plate.jpg') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .plate p {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #ccc;
+        }
+
+        .food-selection {
+            text-align: center;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            text-align: center;
+            max-width: 300px;
+            width: 80%;
+        }
+
+        .popup.show {
+            display: block;
+        }
+
+        .popup button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .popup button:hover {
+            background-color: #45a049;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        .input-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-container input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .input-container button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .input-container button:hover {
+            background-color: #45a049;
+        }
+
+        .choose-button {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .choose-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Healthy Food Selection</h2>
+        <div class="input-container">
+            <input type="text" id="student-name" placeholder="Enter your name">
+            <button onclick="startSelection()">Start</button>
+        </div>
+        <div id="food-selection" style="display:none;">
+            <p>Drag and drop 5 foods into the plate:</p>
+            <div class="plate" id="plate" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <p id="plate-text">Plate</p>
+            </div>
+            <div id="food-container" class="food-selection"></div>
+            <button class="choose-button" onclick="chooseFoods()">Choose</button>
+        </div>
+        <div class="overlay" id="overlay"></div>
+        <div class="popup" id="food-popup">
+            <p id="food-message"></p>
+            <button onclick="closePopup()">Close</button>
+        </div>
+    </div>
+    
+    <script>
+        var selectedFoods = [];
+        var studentName = "";
+
+        function startSelection() {
+            studentName = document.getElementById("student-name").value;
+            if (studentName.trim() === "") {
+                alert("Please enter your name.");
+                return;
+            }
+            document.querySelector(".input-container").style.display = "none";
+            document.getElementById("food-selection").style.display = "block";
+            displayRandomImages();
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function drag(event) {
+            event.dataTransfer.setData("text", event.target.id);
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            var data = event.dataTransfer.getData("text");
+            var element = document.getElementById(data);
+            var plate = document.getElementById("plate");
+
+            if (selectedFoods.length < 5 && !selectedFoods.includes(element.alt)) {
+                plate.appendChild(element);
+                selectedFoods.push(element.alt);
+                element.style.position = "absolute";
+                element.style.margin = "0";
+                element.style.left = (event.clientX - plate.getBoundingClientRect().left - 50) + "px";
+                element.style.top = (event.clientY - plate.getBoundingClientRect().top - 50) + "px";
+                if (selectedFoods.length === 5) {
+                    document.getElementById("plate-text").style.display = "none";
+                }
+            } else if (selectedFoods.includes(element.alt)) {
+                alert("This item is already on the plate.");
+            } else {
+                alert("You can only select 5 foods.");
+            }
+        }
+
+        function chooseFoods() {
+            if (selectedFoods.length !== 5) {
+                alert("Please select exactly 5 foods.");
+                return;
+            }
+
+            var healthyFoods = ["Apple", "Banana", "Mango", "Orange", "Watermelon", "Broccoli", "Carrot", "Pear", "Spinach", "Tomato","Sushi",'Rice','Milk','Salad','Soup','Grilled Chicken'];
+            var healthyCount = selectedFoods.filter(food => healthyFoods.includes(food)).length;
+
+            var foodMessage = document.getElementById("food-message");
+            if (healthyCount >= 4) {
+                foodMessage.innerHTML = "Great job, " + studentName + "! You selected " + healthyCount + " healthy foods! <br><br>👏👏👏";
+            } else {
+                foodMessage.innerHTML = "You selected " + healthyCount + " healthy foods, " + studentName + ". Try to select at least 4 healthy foods next time.";
+            }
+
+            var overlay = document.getElementById("overlay");
+            var popup = document.getElementById("food-popup");
+            overlay.classList.add("show");
+            popup.classList.add("show");
+        }
+
+        function closePopup() {
+            var overlay = document.getElementById("overlay");
+            var popup = document.getElementById("food-popup");
+            overlay.classList.remove("show");
+            popup.classList.remove("show");
+        }
+
+        function displayRandomImages() {
+            var container = document.getElementById("food-container");
+            container.innerHTML = "";
+
+            var foodImages = [
+                '<img src="images/apple.webp" alt="Apple" class="food-image" id="apple" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/banana.webp" alt="Banana" class="food-image" id="banana" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/mango.webp" alt="Mango" class="food-image" id="mango" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/orange.webp" alt="Orange" class="food-image" id="orange" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/watermelon.webp" alt="Watermelon" class="food-image" id="watermelon" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/broccoli.webp" alt="Broccoli" class="food-image" id="broccoli" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/carrot.webp" alt="Carrot" class="food-image" id="carrot" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/pear.webp" alt="Pear" class="food-image" id="pear" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/spinach.webp" alt="Spinach" class="food-image" id="spinach" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/tomato.webp" alt="Tomato" class="food-image" id="tomato" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/burger.webp" alt="Burger" class="food-image" id="burger" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/candy.jpg" alt="Candy" class="food-image" id="candy" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/chips.jpg" alt="Chips" class="food-image" id="chips" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/cookies.webp" alt="Cookies" class="food-image" id="cookies" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/donut.webp" alt="Donut" class="food-image" id="donut" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/french-fries.webp" alt="French Fries" class="food-image" id="french-fries" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/ice-cream.webp" alt="Ice Cream" class="food-image" id="ice-cream" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/pizza.webp" alt="Pizza" class="food-image" id="pizza" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/soda.webp" alt="Soda" class="food-image" id="soda" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/tacos.webp" alt="Tacos" class="food-image" id="tacos" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/grilled-chicken.webp" alt="Grilled Chicken" class="food-image" id="grilled-chicken" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/rice.webp" alt="Rice" class="food-image" id="rice" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/salad.webp" alt="Salad" class="food-image" id="salad" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/soup.webp" alt="Soup" class="food-image" id="soup" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/sushi.webp" alt="Sushi" class="food-image" id="sushi" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/milk.webp" alt="Milk" class="food-image" id="milk" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/fried-chicken.webp" alt="Fried Chicken" class="food-image" id="fried-chicken" draggable="true" ondragstart="drag(event)">',
+                '<img src="images/fries.webp" alt="French Fries" class="food-image" id="fries" draggable="true" ondragstart="drag(event)">'
+            ];
+
+            foodImages = shuffle(foodImages);
+            container.innerHTML = foodImages.join('');
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
